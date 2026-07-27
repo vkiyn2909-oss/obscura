@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OBSCURA — gallery of work</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;1,9..144,500&family=Inter:wght@400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+  :root{
+    --paper:#FFFFFF;
+    --paper-2:#F3F3F1;
+    --paper-3:#E7E7E4;
+    --ink:#0A0A0A;
+    --ink-soft:#63625D;
+    --line: rgba(10,10,10,.14);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  img{display:block;width:100%;height:100%;object-fit:cover;}
+  a{color:inherit;text-decoration:none;}
+
+  .eyebrow{
+    font-family:'Inter',sans-serif;
+    font-size:.7rem;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+  }
+
+  .grain{
+    position:fixed; inset:0; z-index:80; pointer-events:none;
+    opacity:.035; mix-blend-mode:multiply;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  header{
+    position:fixed; top:0; left:0; right:0; z-index:70;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:1.4rem clamp(1.2rem,3vw,3rem);
+    color:var(--ink);
+  }
+  .logo{
+    font-family:'Fraunces',serif; font-style:italic; font-weight:500;
+    font-size:1.15rem; letter-spacing:.02em;
+  }
+  nav{display:flex; gap:clamp(1.2rem,3vw,2.6rem);}
+  nav a{
+    font-size:.72rem; letter-spacing:.18em; text-transform:uppercase;
+    position:relative; padding-bottom:2px;
+  }
+  nav a::after{
+    content:''; position:absolute; left:0; bottom:0; width:0; height:1px;
+    background:currentColor; transition:width .35s ease;
+  }
+  nav a:hover::after{width:100%;}
+
+  .aperture{
+    position:fixed; right:clamp(1.2rem,3vw,2.4rem); bottom:clamp(1.2rem,3vw,2.4rem);
+    width:56px; height:56px; z-index:70; pointer-events:none;
+  }
+  .aperture svg{width:100%;height:100%;}
+  .aperture-ring{transform-origin:50% 50%;}
+
+  /* ---- hero (scattered field, video reference) ---- */
+  .hero2{
+    position:relative; height:100vh; min-height:560px; width:100%;
+    overflow:visible; background:var(--paper); color:var(--ink);
+  }
+  .hc{
+    position:absolute; z-index:30;
+    font-family:'Inter',sans-serif; font-size:.7rem; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--ink-soft);
+  }
+  .hc-tl{ top:6.4rem; left:clamp(1.2rem,3vw,3rem); }
+
+  .thumb{
+    position:absolute; will-change:transform; z-index:5;
+  }
+  .thumb-inner{
+    width:100%; height:100%; overflow:hidden; box-shadow:0 10px 26px -12px rgba(10,10,10,.28);
+    transition:transform .5s cubic-bezier(.22,.8,.3,1), box-shadow .4s ease;
+    transform-origin:center center;
+  }
+  .thumb:hover{ z-index:40; }
+  .thumb:hover .thumb-inner{ transform:scale(1.22); box-shadow:0 22px 44px -16px rgba(10,10,10,.4); }
+
+  .hero-center{
+    position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    z-index:20; text-align:center; pointer-events:none; white-space:nowrap;
+  }
+  .hero-center .l1{ font-family:'Fraunces',serif; font-style:italic; font-weight:500; font-size:clamp(1.3rem,2.4vw,1.8rem); }
+  .hero-center .l2{ font-family:'Inter',sans-serif; font-weight:400; font-size:.8rem; letter-spacing:.06em; color:var(--ink-soft); margin-top:.4rem; }
+
+  .scroll-cue{
+    position:absolute; bottom:2.2rem; left:50%; transform:translateX(-50%);
+    font-size:.65rem; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-soft);
+    z-index:25;
+  }
+
+  /* ---- manifesto strip ---- */
+  .manifesto{
+    padding:clamp(6rem,14vw,10rem) clamp(1.4rem,6vw,4rem);
+    max-width:1100px; margin:0 auto;
+  }
+  .manifesto p{
+    font-family:'Fraunces',serif; font-weight:400;
+    font-size:clamp(1.6rem,3.6vw,2.6rem); line-height:1.35;
+    letter-spacing:-.01em;
+  }
+  .manifesto em{ font-style:italic; border-bottom:1px solid var(--ink); }
+  .manifesto .cite{ margin-top:2rem; font-size:.8rem; color:var(--ink-soft); }
+
+  /* ---- work section ---- */
+  .work-mast{ padding:clamp(4rem,9vw,6rem) clamp(1.2rem,3vw,2.4rem) clamp(2rem,5vw,3rem); overflow:hidden; text-align:center; }
+  .work-mast h2{
+    font-family:'Fraunces',serif; font-weight:500; font-style:italic;
+    font-size:clamp(3.4rem,12vw,10rem); line-height:.86; letter-spacing:-.01em;
+  }
+
+  .work-featured{ background:var(--paper); color:var(--ink); padding:clamp(2.4rem,5vw,3.6rem) clamp(1.2rem,4vw,3rem) clamp(4rem,8vw,6rem); }
+  .wf-head{ display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:1rem; margin-bottom:2.2rem; }
+  .wf-head .wf-date{ font-size:.75rem; letter-spacing:.1em; color:var(--ink-soft); }
+  .wf-body{ display:grid; grid-template-columns:1.1fr .9fr; gap:clamp(2rem,5vw,4rem); align-items:center; }
+  .wf-media{ aspect-ratio:4/3; overflow:hidden; }
+  .wf-title{ font-family:'Fraunces',serif; font-style:italic; font-weight:500; font-size:clamp(2rem,4.4vw,3.2rem); margin-bottom:1.1rem; }
+  .wf-text p{ font-size:1rem; line-height:1.65; color:var(--ink-soft); max-width:46ch; }
+  .wf-links{ display:flex; gap:1rem; margin-top:2rem; flex-wrap:wrap; }
+  .wf-links a{
+    font-size:.72rem; letter-spacing:.12em; text-transform:uppercase;
+    padding:.8rem 1.3rem; border:1px solid var(--ink);
+    transition:all .25s ease;
+  }
+  .wf-links a:hover{ background:var(--ink); color:#fff; }
+  .wf-links a.primary{ background:var(--ink); color:#fff; }
+  .wf-links a.primary:hover{ background:transparent; color:var(--ink); }
+
+  .work-list{ padding:clamp(3rem,7vw,4.5rem) clamp(1.2rem,4vw,3rem) clamp(5rem,9vw,7rem); }
+  .wl-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:clamp(1.6rem,3vw,2.6rem); }
+  .wl-media{ aspect-ratio:4/5; overflow:hidden; margin-bottom:1.1rem; background:var(--paper-2); }
+  .wl-media img{ transition:transform .8s ease; }
+  .wl-item:hover .wl-media img{ transform:scale(1.05); }
+  .wl-item h3{ font-family:'Fraunces',serif; font-style:italic; font-weight:500; font-size:1.15rem; margin-bottom:.3rem; }
+  .wl-item span{ font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-soft); }
+  .wl-foot{ display:flex; justify-content:flex-end; margin-top:clamp(2.4rem,5vw,3.4rem); }
+  .wl-foot a{ font-size:.75rem; letter-spacing:.1em; text-transform:uppercase; border-bottom:1px solid var(--ink); padding-bottom:.2rem; }
+
+  /* ---- about (long editorial layout, light) ---- */
+  .about{ background:var(--paper); color:var(--ink); }
+  .about-mast{
+    padding:clamp(4rem,9vw,6rem) clamp(1rem,3vw,2.4rem) clamp(1rem,3vw,2rem);
+    overflow:hidden;
+    text-align:center;
+  }
+  .about-mast h2{
+    font-family:'Fraunces',serif; font-weight:500; font-style:italic;
+    font-size:clamp(4.5rem,17vw,15rem); line-height:.82; letter-spacing:-.02em;
+    white-space:nowrap; color:var(--ink);
+  }
+  .about-intro{
+    display:grid; grid-template-columns:1.5fr 1fr; gap:clamp(2rem,5vw,5rem);
+    padding:0 clamp(1.2rem,4vw,3rem) clamp(5rem,10vw,7rem);
+  }
+  .about-intro .eyebrow{ margin-bottom:1.4rem; }
+  .about-intro p{
+    font-family:'Fraunces',serif; font-weight:400; font-size:clamp(1.3rem,2.6vw,1.9rem);
+    line-height:1.5; color:var(--ink);
+  }
+  .about-intro p + p{ margin-top:1.2rem; }
+  .fact-list{ display:flex; flex-direction:column; gap:1.6rem; padding-top:.4rem; }
+  .fact-list div{ padding-top:.9rem; }
+  .fact-list span{ display:block; }
+  .fact-list span:first-child{ font-size:.68rem; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-soft); margin-bottom:.5rem; }
+  .fact-list span:last-child{ font-family:'Fraunces',serif; font-style:italic; font-weight:500; font-size:1.15rem; }
+
+  .notes{ padding:clamp(4rem,9vw,6rem) clamp(1.2rem,4vw,3rem); background:var(--paper); }
+  .notes-head{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:clamp(2.4rem,5vw,3.6rem); }
+  .notes-head span{ font-size:.72rem; color:var(--ink-soft); }
+  .notes-grid{
+    display:grid; grid-template-columns:repeat(6,1fr); gap:clamp(1rem,2.4vw,2rem);
+  }
+  .note{ grid-column:span 2; padding-top:1.3rem; }
+  .note.wide{ grid-column:span 3; }
+  .note .n-idx{ font-size:.72rem; color:var(--ink-soft); letter-spacing:.1em; }
+  .note .n-thumb{ margin:1rem 0; aspect-ratio:4/3; overflow:hidden; background:var(--paper-3); }
+  .note h3{ font-family:'Fraunces',serif; font-style:italic; font-weight:500; font-size:1.3rem; margin-bottom:.5rem; }
+  .note p{ font-size:.86rem; color:var(--ink-soft); line-height:1.55; }
+  .note:nth-child(2){ margin-top:3rem; }
+  .note:nth-child(4){ margin-top:-1.6rem; }
+  .note:nth-child(5){ margin-top:2rem; }
+
+  .about-lines{ padding:clamp(5rem,11vw,8rem) clamp(1.2rem,4vw,3rem); text-align:center; max-width:900px; margin:0 auto; }
+  .about-line{
+    font-family:'Fraunces',serif; font-weight:400;
+    font-size:clamp(1.5rem,3.4vw,2.3rem); line-height:1.4;
+    color:var(--ink-soft); margin-bottom:.4rem;
+    opacity:0; transform:translateY(16px);
+    transition:opacity .7s ease, transform .7s ease;
+  }
+  .about-line.in{ opacity:1; transform:translateY(0); }
+  .about-line strong{ color:var(--ink); font-weight:500; font-style:italic; }
+
+  /* ---- contact / footer ---- */
+  .contact{ padding:clamp(5rem,12vw,8rem) clamp(1.4rem,6vw,4rem) 3rem; }
+  .contact h2{ font-family:'Fraunces',serif; font-weight:500; font-style:italic; font-size:clamp(2.6rem,7vw,5.4rem); line-height:1.02; max-width:14ch; }
+  .contact-row{
+    margin-top:clamp(3rem,6vw,4.5rem);
+    display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:2rem;
+    padding-bottom:2.4rem;
+  }
+  .contact-link{ font-size:1.4rem; font-family:'Fraunces',serif; font-style:italic; border-bottom:1px solid var(--ink); padding-bottom:.2rem; }
+  .contact-meta{ display:flex; gap:clamp(2rem,5vw,4rem); flex-wrap:wrap; }
+  .contact-meta div span{display:block;}
+  .contact-meta div span:first-child{ font-size:.68rem; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-soft); margin-bottom:.4rem; }
+  footer{ display:flex; justify-content:space-between; padding:1.6rem 0; font-size:.7rem; letter-spacing:.1em; color:var(--ink-soft); text-transform:uppercase; }
+
+  /* ---- responsive ---- */
+  @media (max-width:1024px){
+    .wf-body{ gap:2rem; }
+    .notes-grid{ grid-template-columns:repeat(4,1fr); }
+    .note{ grid-column:span 2; margin-top:0 !important; }
+    .note.wide{ grid-column:span 4; }
+    .wl-grid{ grid-template-columns:repeat(3,1fr); gap:1.4rem; }
+  }
+  @media (max-width:860px){
+    header{ padding:1.1rem clamp(1rem,3vw,1.6rem); }
+    .wf-body{ grid-template-columns:1fr; }
+    .wf-media{ aspect-ratio:4/3; order:-1; }
+    .wl-grid{ grid-template-columns:repeat(2,1fr); }
+  }
+  @media (max-width:760px){
+    nav{ gap:.9rem; }
+    nav a{ font-size:.64rem; letter-spacing:.12em; }
+    .logo{ font-size:1rem; }
+    .aperture{ width:42px; height:42px; }
+
+    .hero-center .l1{ font-size:1.1rem; }
+    .hc{ font-size:.6rem; }
+    .hc-tl{ top:5.6rem; }
+
+    .work-mast h2, .about-mast h2{ font-size:clamp(3rem,16vw,5.5rem); }
+    .wl-grid{ grid-template-columns:repeat(2,1fr); gap:1rem; }
+    .wf-links a{ flex:1; text-align:center; }
+
+    .about-intro{ grid-template-columns:1fr; }
+    .fact-list{ margin-top:1rem; }
+    .notes-grid{ grid-template-columns:repeat(2,1fr); gap:1.2rem; }
+    .note, .note.wide{ grid-column:span 2; margin-top:0 !important; }
+
+    .contact h2{ max-width:100%; }
+    .contact-row{ flex-direction:column; align-items:flex-start; gap:1.6rem; }
+    .contact-meta{ gap:2rem; }
+    footer{ flex-direction:column; gap:.5rem; align-items:flex-start; }
+  }
+  @media (max-width:420px){
+    .work-mast h2, .about-mast h2{ font-size:clamp(2.4rem,17vw,4rem); }
+    .wl-grid{ grid-template-columns:1fr; }
+    .notes-grid{ grid-template-columns:1fr; }
+    .note, .note.wide{ grid-column:span 1; }
+    .aperture{ display:none; }
+  }
+  @media (max-height:520px) and (orientation:landscape){
+    .hero-center .l2{ display:none; }
+  }
+
+  /* ---- scrollytelling scenes (Getty Tracing Art rhythm) ---- */
+  .reveal, .reveal-img{
+    opacity:0; transform:translateY(26px);
+    transition:opacity 1s cubic-bezier(.22,.8,.3,1), transform 1s cubic-bezier(.22,.8,.3,1);
+  }
+  .reveal-img{ transform:translateY(0) scale(1.07); }
+  .reveal.in, .reveal-img.in{ opacity:1; transform:none; }
+
+  .scene{
+    max-width:640px; margin:0 auto; text-align:center;
+    padding:clamp(5rem,12vw,9rem) clamp(1.2rem,4vw,2rem);
+  }
+  .scene-eyebrow{ margin-bottom:1.6rem; }
+  .scene-media{
+    position:relative;
+    width:100%; aspect-ratio:4/3; overflow:hidden; margin:0 auto 2rem;
+    box-shadow:0 30px 60px -30px rgba(10,10,10,.35);
+  }
+  .scene-media img{ transition:transform 1.1s cubic-bezier(.22,.8,.3,1); }
+  .scene-media:hover img{ transform:scale(1.06); }
+  .scene-cat{ margin-top:1rem; }
+  .scene-title{
+    font-family:'Fraunces',serif; font-style:italic; font-weight:500;
+    font-size:clamp(1.7rem,3.6vw,2.6rem); margin-bottom:1.2rem;
+  }
+  .scene-text p{
+    font-family:'Fraunces',serif; font-weight:400; color:var(--ink-soft);
+    font-size:clamp(1.05rem,1.8vw,1.3rem); line-height:1.6;
+    max-width:52ch; margin:0 auto .8rem;
+  }
+  .scene-links{ display:flex; gap:1rem; justify-content:center; margin-top:2rem; flex-wrap:wrap; }
+  .scene-links a{
+    font-family:'Inter',sans-serif; font-size:.72rem; letter-spacing:.12em; text-transform:uppercase;
+    padding:.8rem 1.3rem; border:1px solid var(--ink); transition:all .25s ease;
+  }
+  .scene-links a:hover{ background:var(--ink); color:#fff; }
+  .scene-links a.primary{ background:var(--ink); color:#fff; }
+  .scene-links a.primary:hover{ background:transparent; color:var(--ink); }
+  .scene-num{
+    font-family:'Inter',sans-serif; font-size:.72rem; letter-spacing:.14em; color:var(--ink-soft);
+    margin-bottom:1rem;
+  }
+  .scene-divider{ width:1px; height:5rem; background:var(--line); margin:0 auto; }
+
+  .stat-row{
+    display:flex; justify-content:center; gap:clamp(2rem,6vw,4.5rem); flex-wrap:wrap;
+    margin-top:clamp(3rem,6vw,4rem);
+  }
+  .stat-row div{ text-align:center; }
+  .stat-row span{ display:block; }
+  .stat-row span:first-child{ font-size:.68rem; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-soft); margin-bottom:.5rem; }
+  .stat-row span:last-child{ font-family:'Fraunces',serif; font-style:italic; font-weight:500; font-size:1.15rem; }
+
+  /* ---- Work: cursor-follow tag (replaces rectangular buttons) ---- */
+  .cursor-tag{
+    position:absolute; top:0; left:0; width:84px; height:84px; border-radius:50%;
+    background:var(--paper); color:var(--ink); display:flex; align-items:center; justify-content:center;
+    font-family:'Inter',sans-serif; font-size:.68rem; letter-spacing:.1em; text-transform:uppercase;
+    opacity:0; transform:translate(-50%,-50%) scale(.6);
+    transition:opacity .3s ease, transform .3s ease;
+    pointer-events:none; z-index:8;
+  }
+  .scene-media:hover .cursor-tag, .uw-frame:hover .cursor-tag{ opacity:1; transform:translate(-50%,-50%) scale(1); }
+
+  /* ---- Featured: pinned scroll scene (grow / pan / fact) ---- */
+  .uw-wrap{ position:relative; height:420vh; }
+  .uw-stage{
+    position:sticky; top:0; height:100vh; width:100%;
+    overflow:hidden;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:0 clamp(1.2rem,4vw,2rem);
+  }
+  .uw-scaler{
+    position:relative; z-index:3;
+    width:min(62vw,760px); aspect-ratio:4/3;
+    will-change:transform;
+  }
+  .uw-frame{
+    position:absolute; inset:0; overflow:hidden;
+    box-shadow:0 30px 60px -30px rgba(10,10,10,.35);
+  }
+  .uw-frame img{
+    position:absolute; top:0; left:0; width:100%; height:160%;
+    object-fit:cover; will-change:transform;
+  }
+  .uw-text{
+    position:relative; z-index:2; margin-top:clamp(1.6rem,3vw,2.2rem);
+    width:min(90vw,640px); will-change:opacity, transform;
+  }
+  .uw-text .scene-title{ margin:1rem 0 1.2rem; }
+  .uw-text .scene-text p{ margin:0 auto .6rem; }
+  .uw-fact{
+    position:absolute; left:50%; bottom:10vh; transform:translate(-50%,12px);
+    z-index:6; width:min(80vw,480px);
+    font-family:'Inter',sans-serif; font-size:.82rem; line-height:1.6;
+    color:#fff; text-align:center;
+    background:rgba(10,10,10,.45); backdrop-filter:blur(6px);
+    padding:1.1rem 1.5rem; opacity:0; pointer-events:none;
+  }
+
+  @media (max-width:760px){
+    .uw-wrap{ height:360vh; }
+    .uw-fact{ font-size:.76rem; bottom:7vh; padding:.9rem 1.2rem; }
+  }
+
+  .work-end{ text-align:center; padding:0 1.2rem; }
+  .work-end-link{
+    font-size:.75rem; letter-spacing:.1em; text-transform:uppercase;
+    border-bottom:1px solid var(--ink); padding-bottom:.2rem;
+  }
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+
+<header>
+  <div class="logo">OBSCURA</div>
+  <nav>
+    <a href="#work">Work</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<div class="aperture">
+  <svg viewBox="0 0 56 56">
+    <circle cx="28" cy="28" r="26" fill="none" stroke="var(--ink)" stroke-width="1" opacity=".4"/>
+    <g class="aperture-ring" id="apertureRing">
+      <line x1="28" y1="4" x2="28" y2="12" stroke="var(--ink)" stroke-width="2"/>
+      <line x1="28" y1="4" x2="28" y2="12" stroke="var(--ink)" stroke-width="2" transform="rotate(60 28 28)"/>
+      <line x1="28" y1="4" x2="28" y2="12" stroke="var(--ink)" stroke-width="2" transform="rotate(120 28 28)"/>
+      <line x1="28" y1="4" x2="28" y2="12" stroke="var(--ink)" stroke-width="2" transform="rotate(180 28 28)"/>
+      <line x1="28" y1="4" x2="28" y2="12" stroke="var(--ink)" stroke-width="2" transform="rotate(240 28 28)"/>
+      <line x1="28" y1="4" x2="28" y2="12" stroke="var(--ink)" stroke-width="2" transform="rotate(300 28 28)"/>
+    </g>
+  </svg>
+</div>
+
+<!-- HERO -->
+<section class="hero2" id="hero">
+  <div class="hc hc-tl">© 2026</div>
+
+  <div class="hero-center">
+    <div class="l1">OBSCURA</div>
+    <div class="l2">Online gallery of work (est. 2026)</div>
+  </div>
+
+  <div id="thumbField"></div>
+
+  <div class="scroll-cue">Scroll</div>
+</section>
+
+<!-- MANIFESTO -->
+<section class="manifesto">
+  <p>We don't build light around a person. We wait until they <em>forget the camera</em> — and that's when we shoot.</p>
+  <div class="cite">— OBSCURA, philosophy</div>
+</section>
+
+<!-- WORK -->
+<section id="work">
+  <div class="work-mast"><h2>Work</h2></div>
+
+  <div class="uw-wrap" id="uwWrap">
+    <div class="uw-stage">
+      <div class="uw-scaler" id="uwScaler">
+        <div class="uw-frame">
+          <img src="images/work-featured.jpg" alt="" id="uwImg">
+          <div class="cursor-tag">Explore</div>
+        </div>
+      </div>
+
+      <div class="uw-text" id="uwText">
+        <div class="eyebrow scene-eyebrow">/ Featured — Arthouse, 2025</div>
+        <div class="scene-title">Undertow</div>
+        <div class="scene-text">
+          <p>A quiet study of five sitters shot over one winter, built around stillness rather than direction.</p>
+          <p>No set — just window light, a chair, and however long it took for the pose to fall apart.</p>
+        </div>
+      </div>
+
+      <div class="uw-fact" id="uwFact">By the time this frame was taken, the shoot had run four hours over schedule — no one left in the room was still posing.</div>
+    </div>
+  </div>
+
+  <div class="scene">
+    <div class="scene-divider"></div>
+  </div>
+
+  <div class="scene">
+    <div class="scene-num reveal">02</div>
+    <div class="scene-media reveal-img" style="max-width:420px; aspect-ratio:4/5;">
+      <img src="images/work-silt.jpg" alt="">
+      <div class="cursor-tag">View</div>
+    </div>
+    <div class="scene-title reveal">Silt</div>
+    <div class="scene-cat eyebrow reveal">Fashion — 2025</div>
+  </div>
+
+  <div class="scene">
+    <div class="scene-num reveal">03</div>
+    <div class="scene-media reveal-img" style="max-width:480px; aspect-ratio:16/9;">
+      <img src="images/work-ninth-frame.gif" alt="">
+      <div class="cursor-tag">View</div>
+    </div>
+    <div class="scene-title reveal">Ninth Frame</div>
+    <div class="scene-cat eyebrow reveal">Film — 2024</div>
+  </div>
+
+  <div class="scene">
+    <div class="scene-num reveal">04</div>
+    <div class="scene-media reveal-img" style="max-width:420px; aspect-ratio:4/5;">
+      <img src="images/work-cinder.jpg" alt="">
+      <div class="cursor-tag">View</div>
+    </div>
+    <div class="scene-title reveal">Cinder</div>
+    <div class="scene-cat eyebrow reveal">Brand — 2024</div>
+    <div class="work-end" style="padding-top:2.4rem;">
+      <a href="#" class="work-end-link">View all work ↗</a>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT (long editorial layout) -->
+<section class="about" id="about">
+  <div class="about-mast"><h2>About OBSCURA</h2></div>
+
+  <div class="scene" style="max-width:760px;">
+    <div class="eyebrow scene-eyebrow reveal">/ About</div>
+    <p class="reveal" style="font-family:'Fraunces',serif; font-size:clamp(1.3rem,2.6vw,1.9rem); line-height:1.5; color:var(--ink); margin-bottom:1.2rem;">OBSCURA didn't start with a camera. It started with a question: what's left in the frame once you take away the pose?</p>
+    <p class="reveal" style="font-family:'Fraunces',serif; font-size:clamp(1.3rem,2.6vw,1.9rem); line-height:1.5; color:var(--ink);">We build a space where something real has time to happen — and then we simply manage to catch it. More movement than posing. More silence than direction.</p>
+    <div class="stat-row reveal">
+      <div><span>Founded</span><span>2019, Kyiv</span></div>
+      <div><span>Focus</span><span>Fashion · Brand · Film · Arthouse</span></div>
+      <div><span>Based</span><span>Kyiv / Worldwide</span></div>
+      <div><span>Studio</span><span>3 photographers, 1 director</span></div>
+    </div>
+  </div>
+
+  <div class="notes">
+  <div class="scene">
+    <div class="eyebrow scene-eyebrow reveal">/ Notes on how we work</div>
+  </div>
+  <div class="scene">
+    <div class="scene-num reveal">01</div>
+    <div class="scene-media reveal-img" style="max-width:460px; aspect-ratio:4/3;"><img src="images/note-01-posing.jpg" alt=""></div>
+    <div class="scene-title reveal">On posing</div>
+    <div class="scene-text"><p class="reveal">We rarely say "stand like this." We direct the situation, not the body.</p></div>
+  </div>
+  <div class="scene" style="padding-top:0; padding-bottom:0;"><div class="scene-divider"></div></div>
+  <div class="scene">
+    <div class="scene-num reveal">02</div>
+    <div class="scene-media reveal-img" style="max-width:460px; aspect-ratio:4/3;"><img src="images/note-02-light.jpg" alt=""></div>
+    <div class="scene-title reveal">On light</div>
+    <div class="scene-text"><p class="reveal">Natural light as a conversation partner, not a correction tool.</p></div>
+  </div>
+  <div class="scene" style="padding-top:0; padding-bottom:0;"><div class="scene-divider"></div></div>
+  <div class="scene">
+    <div class="scene-num reveal">03</div>
+    <div class="scene-media reveal-img" style="max-width:460px; aspect-ratio:4/3;"><img src="images/note-03-waiting.jpg" alt=""></div>
+    <div class="scene-title reveal">On waiting</div>
+    <div class="scene-text"><p class="reveal">The best frame is rarely the first one. We keep shooting until the excess disappears.</p></div>
+  </div>
+  <div class="scene" style="padding-top:0; padding-bottom:0;"><div class="scene-divider"></div></div>
+  <div class="scene">
+    <div class="scene-num reveal">04</div>
+    <div class="scene-media reveal-img" style="max-width:460px; aspect-ratio:4/3;"><img src="images/note-04-grain.jpg" alt=""></div>
+    <div class="scene-title reveal">On grain</div>
+    <div class="scene-text"><p class="reveal">Film texture isn't a filter — it's a way of not erasing what's imperfect.</p></div>
+  </div>
+  <div class="scene" style="padding-top:0; padding-bottom:0;"><div class="scene-divider"></div></div>
+  <div class="scene">
+    <div class="scene-num reveal">05</div>
+    <div class="scene-media reveal-img" style="max-width:460px; aspect-ratio:4/3;"><img src="images/note-05-silence.jpg" alt=""></div>
+    <div class="scene-title reveal">On silence</div>
+    <div class="scene-text"><p class="reveal">Half an hour without a camera before the shoot often matters more than the shoot itself.</p></div>
+  </div>
+  <div class="scene" style="padding-top:0; padding-bottom:0;"><div class="scene-divider"></div></div>
+  <div class="scene">
+    <div class="scene-num reveal">06</div>
+    <div class="scene-media reveal-img" style="max-width:460px; aspect-ratio:4/3;"><img src="images/note-06-trust.jpg" alt=""></div>
+    <div class="scene-title reveal">On trust</div>
+    <div class="scene-text"><p class="reveal">We show everything we shot before the edit — no dressing up the process.</p></div>
+  </div>
+  <div class="scene" style="padding-top:0; padding-bottom:0;"><div class="scene-divider"></div></div>
+</div>
+
+  <div class="about-lines">
+    <div class="about-line">There's no style here that can be copied.</div>
+    <div class="about-line">There's a <strong>way of seeing</strong> that can be recognised.</div>
+    <div class="about-line">Fashion. Brands. Film. Arthouse — different languages, one way of seeing.</div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact" id="contact" style="text-align:center;">
+  <h2 class="reveal" style="margin:0 auto;">Tell us what we're shooting.</h2>
+  <div class="contact-row" style="justify-content:center; gap:clamp(2rem,6vw,4rem);">
+    <a href="mailto:hello@obscura.studio" class="contact-link reveal">hello@obscura.studio</a>
+    <div class="contact-meta reveal">
+      <div><span>Instagram</span><span>@obscura.studio</span></div>
+      <div><span>Location</span><span>Kyiv / Worldwide</span></div>
+    </div>
+  </div>
+  <footer>
+    <span>© OBSCURA</span>
+    <span>Work / About / Contact</span>
+  </footer>
+</section>
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+/* aperture rotates with page scroll */
+const apertureRing = document.getElementById('apertureRing');
+ScrollTrigger.create({
+  trigger: 'body', start:'top top', end:'bottom bottom', scrub:0.3,
+  onUpdate: self => { apertureRing.style.transform = `rotate(${self.progress*360}deg)`; }
+});
+
+const revealObserver = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      entry.target.classList.add('in');
+      revealObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+
+document.querySelectorAll('.reveal, .reveal-img, .about-line').forEach(el=>{
+  revealObserver.observe(el);
+});
+
+/* ---------------- HERO thumb field ---------------- */
+const HERO_0 = "images/hero-00.jpg";
+const HERO_1 = "images/hero-01.jpg";
+const HERO_2 = "images/hero-02.jpg";
+const HERO_3 = "images/hero-03.jpg";
+const HERO_4 = "images/hero-04.jpg";
+const HERO_5 = "images/hero-05.jpg";
+const HERO_6 = "images/hero-06.jpg";
+const HERO_7 = "images/hero-07.jpg";
+const HERO_8 = "images/hero-08.jpg";
+const HERO_9 = "images/hero-09.jpg";
+const HERO_10 = "images/hero-10.jpg";
+const HERO_11 = "images/hero-11.jpg";
+const HERO_12 = "images/hero-12.jpg";
+const HERO_13 = "images/hero-13.jpg";
+const HERO_14 = "images/hero-14.jpg";
+const HERO_15 = "images/hero-15.jpg";
+const HERO_16 = "images/hero-16.jpg";
+const HERO_17 = "images/hero-17.jpg";
+const HERO_18 = "images/hero-18.jpg";
+const HERO_19 = "images/hero-19.jpg";
+const HERO_20 = "images/hero-20.jpg";
+const HERO_21 = "images/hero-21.jpg";
+const HERO_22 = "images/hero-22.jpg";
+const HERO_23 = "images/hero-23.jpg";
+const HERO_24 = "images/hero-24.jpg";
+const HERO_25 = "images/hero-25.gif";
+const HERO_26 = "images/hero-26.jpg";
+const HERO_27 = "images/hero-27.gif";
+const HERO_28 = "images/hero-28.gif";
+const PHOTOS = [
+  HERO_0,
+  HERO_1,
+  HERO_2,
+  HERO_3,
+  HERO_4,
+  HERO_5,
+  HERO_6,
+  HERO_7,
+  HERO_8,
+  HERO_9,
+  HERO_10,
+  HERO_11,
+  HERO_12,
+  HERO_13,
+  HERO_14,
+  HERO_15,
+  HERO_16,
+  HERO_17,
+  HERO_18,
+  HERO_19,
+  HERO_20,
+  HERO_21,
+  HERO_22,
+  HERO_23,
+  HERO_24,
+  HERO_25,
+  HERO_26,
+  HERO_27,
+  HERO_28
+];
+
+// [top%, minPx, vw, maxPx, ratio, phase% (starting horizontal offset)]
+const LAYOUT = [
+  [-2, 34,2.6, 58,'1/1',5],  [3, 70,5.0,105,'4/3',52], [1, 34,2.6, 58,'3/4',29], [7, 34,2.6, 58,'1/1',77],
+  [10,70,5.0,105,'4/3',14],  [13,34,2.6, 58,'1/1',63], [6, 34,2.6, 58,'4/3',88], [16,120,8.5,180,'4/3',40],
+  [20,34,2.6, 58,'1/1',9],   [22,70,5.0,105,'3/4',71], [18,34,2.6, 58,'1/1',58], [26,34,2.6, 58,'4/3',95],
+  [30,70,5.0,105,'1/1',22],  [28,34,2.6, 58,'1/1',80], [24,160,11.0,220,'4/3',45],[34,34,2.6, 58,'1/1',63],
+  [38,70,5.0,105,'4/3',5],   [36,34,2.6, 58,'1/1',86], [42,120,8.5,180,'1/1',17], [46,34,2.6, 58,'4/3',92],
+  [44,70,5.0,105,'4/3',36],  [40,34,2.6, 58,'1/1',70], [50,160,11.0,220,'3/4',25],[54,34,2.6, 58,'1/1',60],
+  [52,70,5.0,105,'4/3',8],   [58,34,2.6, 58,'1/1',84], [62,120,8.5,180,'4/3',48], [60,34,2.6, 58,'3/4',68],
+  [66,70,5.0,105,'1/1',18],  [64,34,2.6, 58,'1/1',96], [70,34,2.6, 58,'4/3',30],  [74,70,5.0,105,'1/1',55],
+  [72,34,2.6, 58,'1/1',10],  [69,110,8.0,160,'1/1',75],[76,34,2.6, 58,'4/3',42],  [82,34,2.6, 58,'1/1',90],
+  [80,70,5.0,105,'3/4',20],  [86,34,2.6, 58,'1/1',65], [90,34,2.6, 58,'4/3',35],  [94,70,5.0,105,'1/1',50]
+];
+
+const field = document.getElementById('thumbField');
+const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const isTouch = window.matchMedia('(hover:none)').matches;
+
+const SPEED = 16; // px/s base drift speed — slow and light
+
+const thumbs = LAYOUT.map((cfg, i)=>{
+  const [top, minPx, vw, maxPx, ratio, phase] = cfg;
+  const el = document.createElement('div');
+  el.className = 'thumb';
+  el.style.top = top + '%';
+  el.style.left = '0';
+  el.style.width = `clamp(${minPx}px, ${vw}vw, ${maxPx}px)`;
+  el.style.aspectRatio = ratio;
+
+  const inner = document.createElement('div');
+  inner.className = 'thumb-inner';
+  const img = document.createElement('img');
+  img.src = PHOTOS[i % PHOTOS.length];
+  img.loading = 'lazy';
+  img.alt = '';
+  inner.appendChild(img);
+  el.appendChild(inner);
+  field.appendChild(el);
+
+  return {
+    el,
+    phase: phase / 100,
+    speedMul: 0.9 + (maxPx - 58) / (220 - 58) * 0.2 + (Math.random()*0.06 - 0.03),
+    depth: 0.25 + Math.random()*0.75,   // cursor parallax depth
+    w: el.offsetWidth
+  };
+});
+
+function refreshWidths(){ thumbs.forEach(o => { o.w = o.el.offsetWidth; }); }
+window.addEventListener('resize', refreshWidths);
+
+let curX = 0, curY = 0, targetX = 0, targetY = 0;
+if(!isTouch){
+  window.addEventListener('mousemove', (e)=>{
+    targetX = (e.clientX / window.innerWidth) * 2 - 1;
+    targetY = (e.clientY / window.innerHeight) * 2 - 1;
+  });
+}
+
+let t0 = performance.now();
+const MAX_PARALLAX = 28;
+
+function tick(now){
+  const t = (now - t0) / 1000;
+  curX += (targetX - curX) * 0.06;
+  curY += (targetY - curY) * 0.06;
+  const vwPx = window.innerWidth;
+
+  thumbs.forEach(o=>{
+    const cycle = vwPx + o.w;
+    let x = (o.phase * cycle) - t * SPEED * o.speedMul;
+    x = ((x % cycle) + cycle) % cycle;
+    x -= o.w;
+    const px = curX * o.depth * MAX_PARALLAX;
+    const py = curY * o.depth * MAX_PARALLAX * 0.5;
+    o.el.style.transform = `translate3d(${x+px}px, ${py}px, 0)`;
+  });
+  requestAnimationFrame(tick);
+}
+
+if(!reduced){
+  requestAnimationFrame(tick);
+} else {
+  thumbs.forEach(o=>{ o.el.style.transform = `translate3d(${o.phase*window.innerWidth}px,0,0)`; });
+}/* ---------------- WORK: Featured pinned scroll scene ---------------- */
+(function(){
+  const scaler = document.getElementById('uwScaler');
+  const img = document.getElementById('uwImg');
+  const textEl = document.getElementById('uwText');
+  const fact = document.getElementById('uwFact');
+  if (!scaler) return;
+
+  function clamp01(v){ return Math.max(0, Math.min(1, v)); }
+  function seg(p, a, b){ return clamp01((p - a) / (b - a)); }
+  function lerp(a, b, t){ return a + (b - a) * t; }
+
+  let sEnd = 2.4;
+  function computeScale(){
+    const r = scaler.getBoundingClientRect();
+    if (r.width && r.height){
+      sEnd = Math.max(window.innerWidth / r.width, window.innerHeight / r.height) * 1.02;
+    }
+  }
+  computeScale();
+  window.addEventListener('resize', computeScale);
+
+  function update(p){
+    const tA = seg(p, 0, 0.12);
+    textEl.style.opacity = 1 - tA;
+    textEl.style.transform = `translateY(${tA * 34}px)`;
+
+    const tB = seg(p, 0.12, 0.38);
+    const tD = seg(p, 0.82, 0.97);
+    const scale = lerp(lerp(1, sEnd, tB), 1, tD);
+    scaler.style.transform = `scale(${scale})`;
+
+    const tC = seg(p, 0.38, 0.82);
+    const panY = -37.5 * tC * (1 - tD);
+    img.style.transform = `translateY(${panY}%)`;
+
+    const factIn = seg(p, 0.42, 0.5);
+    const factOut = seg(p, 0.74, 0.82);
+    const factOpacity = clamp01(Math.min(factIn, 1 - factOut));
+    fact.style.opacity = factOpacity;
+    fact.style.transform = `translate(-50%, ${12 - 12 * factIn}px)`;
+  }
+
+  update(0);
+
+  ScrollTrigger.create({
+    trigger: '.uw-wrap',
+    start: 'top top',
+    end: 'bottom bottom',
+    pin: '.uw-stage',
+    scrub: 0.5,
+    onUpdate: self => update(self.progress)
+  });
+})();
+
+/* ---------------- WORK: cursor-follow tag (replaces buttons) ---------------- */
+(function(){
+  document.querySelectorAll('.cursor-tag').forEach(tag => {
+    const container = tag.parentElement;
+    container.addEventListener('mousemove', e => {
+      const r = container.getBoundingClientRect();
+      tag.style.left = (e.clientX - r.left) + 'px';
+      tag.style.top = (e.clientY - r.top) + 'px';
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
